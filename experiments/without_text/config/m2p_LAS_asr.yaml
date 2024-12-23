@@ -1,0 +1,96 @@
+upstream:
+  ckpt_path: ''
+  freeze: False
+  acoustic:
+    downsample_rate: 1                                    # stacked consecutive features vectors to reduce the length of input sequences by this factor.
+    hidden_size: 768                                      # Size of the encoder layers and the pooler layer.
+  semantic:
+    tokenizer_path: '/vol/nfs/mgl/GST/3_31_ctaL/CTAL-main/chinese-roberta-wwm-ext'
+
+
+downstream:
+  vocab_size: 21128
+#  sos_id: 99
+#  eos_id: 10434
+#  decoder:
+#    module: 'LSTM'                        # 'LSTM'/'GRU'/'Transformer'
+#    dim: 512
+#    layer: 2
+#    dropout: 0
+
+optimizer:    #原来的MultimodalEncoderDecoder优化器参数
+  type: 'adamW'                                          # modes: ['adam', 'adamW', 'lamb']
+#  learning_rate: 0.0001                                 # Learning rate for opt. "4e-4" for 'data/libri_mel160_subword5000', "2e-4" for 'data/libri_fmllr_cmvn'
+  learning_rate: 0.0001 ##gst 3.2 change
+  loss_scale: 0                                         # Loss scale to improve fp16 numeric stability. Only used when apex is set to True. 0: dynamic loss scaling. positive power of 2: static loss scaling.
+  warmup_proportion: 0.7                                # Proportion of training to perform linear rate warmup.
+  gradient_accumulation_steps: 1                        # Number of updates steps to accumulate before performing a backward/update pass
+  gradient_clipping: 1.0                                # Maximum gradient norm
+#hparas:
+#  tf_start: 1.0
+#  tf_end: 1.0
+#  tf_step: 500000
+##  optimizer: 'Adadelta'
+##  lr: 0.0001
+#  eps: 0.00000001                         # 1e-8
+#  lr_scheduler: 'fixed'                   # 'fixed'/'warmup'
+#  curriculum: 0
+dataloader:
+#  n_jobs: 2
+  #2. 21 gst change:
+  n_jobs: 8      #5.6 gst change
+  batch_size: 16
+  vocab_size : 21128
+decode:
+  beam_size: 20
+  min_len_ratio: 0.01
+  max_len_ratio: 0.07
+#  lm_path: 'ckpt/lm_example_sd0/best_ppx.pth'
+#  lm_config: 'config/libri/lm_example.yaml'
+#  lm_weight: 0.5
+#  ctc_weight: 0.0
+attention:
+  mode: 'loc'                           # 'dot'/'loc'
+  dim: 300
+  num_head: 1
+  v_proj: False                         # if False and num_head>1, encoder state will be duplicated for each head
+  temperature: 0.5                      # scaling factor for attention
+  loc_kernel_size: 100                  # just for mode=='loc'
+  loc_kernel_num: 10                    # just for mode=='loc'
+decoder:
+  module: 'LSTM'                        # 'LSTM'/'GRU'/'Transformer'
+#  dim: 512
+  dim: 768 #3.14 gst change,because Encoder's dim is 768
+  layer: 1
+  dropout: 0
+
+## Model parameters
+#input_dim = 80  # dimension of feature
+#window_size = 25  # window size for FFT (ms)
+#stride = 10  # window stride for FFT (ms)
+#hidden_size = 512
+#embedding_dim = 512
+#cmvn = True  # apply CMVN on feature
+#num_layers = 4
+#LFR_m = 4
+#LFR_n = 3
+
+#Training:
+##  n_jobs = 8
+#  decode_beam_size: 20
+##  tf_rate = 1.0
+
+#lr = 1e-3
+#num_workers = 1  # for data-loading; right now, only 1 works with h5py
+#grad_clip = 5.  # clip gradients at an absolute value of
+#print_freq = 100  # print training/validation stats  every __ batches
+#checkpoint = None  # path to checkpoint, None if none
+
+## Data parameters
+#
+#
+#DATA_DIR = 'data'
+#aishell_folder = r'E:\asrdataset\model\Listen-Attend-Spell\Listen-Attend-Spell\data\data_aishell'
+#wav_folder = os.path.join(aishell_folder, 'wav')
+#tran_file = os.path.join(aishell_folder, r'transcript\aishell_transcript_v0.8.txt')
+#pickle_file = r'E:\asrdataset\model\Listen-Attend-Spell\Listen-Attend-Spell\data\aishell.pickle'
