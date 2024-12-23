@@ -88,11 +88,6 @@ DOI = {10.32604/cmc.2023.046746}
 }
 ```
 
-## Contact
-For questions or support, please contact:
-- [Your Name](mailto:your.email@example.com)
-- [Repository Issues](https://github.com/yourusername/Audio-Text-Multimodal-ASR/issues)
-
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
