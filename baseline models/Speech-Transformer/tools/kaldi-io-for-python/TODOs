@@ -1,0 +1,2 @@
+- change formatting of the script (4 space indent),
+- develop pythonic tests with 'unittest' library,
