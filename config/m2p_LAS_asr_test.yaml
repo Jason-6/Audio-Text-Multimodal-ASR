@@ -1,0 +1,81 @@
+upstream:
+  ckpt_path: ''
+  freeze: False
+  acoustic:
+    downsample_rate: 1                                    # stacked consecutive features vectors to reduce the length of input sequences by this factor.
+    hidden_size: 768                                      # Size of the encoder layers and the pooler layer.
+  semantic:
+    tokenizer_path: '/home/geshuting/Code/CTAL-main/CTAL-main/chinese-roberta-wwm-ext'
+acoustic:
+    audio_size: 160                                       # `int`, 39 for mfcc, 40 for fmllr, 80 for fbank, 160 for mel
+    max_position_embeddings: 3000
+    downsample_rate: 1                                    # stacked consecutive features vectors to reduce the length of input sequences by this factor.
+    hidden_size: 768                                      # Size of the encoder layers and the pooler layer.
+    num_hidden_layers: 6                                  # Number of hidden layers in the Transformer encoder.
+    num_attention_heads: 12                               # Number of attention heads for each attention layer in the Transformer encoder.
+    intermediate_size: 3072                               # The size of the "intermediate" (i.e., feed-forward) layer in the Transformer encoder.
+    hidden_act: "gelu"                                    # The non-linear activation function (function or string) in the encoder and pooler. If string, "gelu", "relu" and "swish" are supported.
+    hidden_dropout_prob: 0.1                              # The dropout probabilitiy for all fully connected layers in the embeddings, encoder, and pooler.
+    attention_probs_dropout_prob: 0.1                     # The dropout ratio for the attention probabilities.
+    initializer_range: 0.02                               # The sttdev of the truncated_normal_initializer for initializing all weight matrices.
+    mask_proportion: 0.15                                 # mask this percentage of all spectrogram frames in each sequence at random during MAM training
+    mask_consecutive_min: 20                              # mask this amount of consecutive frames
+    mask_consecutive_max: 50                              # mask this amount of consecutive frames
+    mask_allow_overlap: True                              # allow overlap masking
+    mask_bucket_ratio: 1.2                                # only used when overlap is not allowed. sample a mask from each bucket in size of [sampled mask_consecutive * mask_bucket_ratio]
+    mask_frequency: 0                                     # mask maximum this amount of frequency bands, set to 0 for no frequency mask
+    noise_proportion: 0.0                                 # for this percentage of the time, Gaussian noise will be applied on all frames during MAM training, set to 0 for no noise
+    max_input_length: 3000                                # maximum input length (0 for no restriction)
+    is_decoder: True
+    add_cross_attention: True
+
+semantic:
+    hidden_size: 768                                      # Size of the encoder layers and the pooler layer.
+    num_hidden_layers: 6                                  # Number of hidden layers in the Transformer encoder.
+    num_attention_heads: 12                               # Number of attention heads for each attention layer in the Transformer encoder.
+    intermediate_size: 3072                               # The size of the "intermediate" (i.e., feed-forward) layer in the Transformer encoder.
+    hidden_act: "gelu"                                    # The non-linear activation function (function or string) in the encoder and pooler. If string, "gelu", "relu" and "swish" are supported.
+    hidden_dropout_prob: 0.1                              # The dropout probabilitiy for all fully connected layers in the embeddings, encoder, and pooler.
+    attention_probs_dropout_prob: 0.1                     # The dropout ratio for the attention probabilities.
+    initializer_range: 0.02                               # The sttdev of the truncated_normal_initializer for initializing all weight matrices.
+    mask_proportion: 0.15                                 # mask this percentage of all spectrogram frames in each sequence at random during MAM training
+    vocab_size: 21128
+
+
+
+optimizer:    #原来的MultimodalEncoderDecoder优化器参数
+  type: 'adamW'                                          # modes: ['adam', 'adamW', 'lamb']
+#  learning_rate: 0.0001                                 # Learning rate for opt. "4e-4" for 'data/libri_mel160_subword5000', "2e-4" for 'data/libri_fmllr_cmvn'
+  learning_rate: 0.0001 ##gst 3.2 change
+  loss_scale: 0                                         # Loss scale to improve fp16 numeric stability. Only used when apex is set to True. 0: dynamic loss scaling. positive power of 2: static loss scaling.
+  warmup_proportion: 0.7                                # Proportion of training to perform linear rate warmup.
+  gradient_accumulation_steps: 1                        # Number of updates steps to accumulate before performing a backward/update pass
+  gradient_clipping: 1.0                                # Maximum gradient norm
+
+dataloader:
+#  n_jobs: 2
+  #2. 21 gst change:
+  n_jobs: 2
+  batch_size: 8
+  vocab_size : 21128
+#  num_worker : 2
+decode:
+  beam_size: 20
+  min_len_ratio: 0.01
+  max_len_ratio: 0.07
+#  tokenizer_path: "/home/geshuting/Code/CTAL-main/CTAL-main/chinese-roberta-wwm-ext"
+
+attention:
+  mode: 'loc'                           # 'dot'/'loc'
+  dim: 300
+  num_head: 1
+  v_proj: False                         # if False and num_head>1, encoder state will be duplicated for each head
+  temperature: 0.5                      # scaling factor for attention
+  loc_kernel_size: 100                  # just for mode=='loc'
+  loc_kernel_num: 10                    # just for mode=='loc'
+decoder:
+  module: 'LSTM'                        # 'LSTM'/'GRU'/'Transformer'
+#  dim: 512
+  dim: 768 #3.14 gst change,because Encoder's dim is 768
+  layer: 1
+  dropout: 0

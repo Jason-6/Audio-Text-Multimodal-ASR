@@ -1,0 +1,47 @@
+upstream:
+  ckpt_path: ''
+  freeze: False
+  acoustic:
+    downsample_rate: 1                                    # stacked consecutive features vectors to reduce the length of input sequences by this factor.
+    hidden_size: 768                                      # Size of the encoder layers and the pooler layer.
+  semantic:
+    tokenizer_path: '/home/geshuting/Code/CTAL-main/CTAL-main/chinese-roberta-wwm-ext'
+
+
+downstream:
+  vocab_size: 21128
+
+optimizer:    #原来的MultimodalEncoderDecoder优化器参数
+  type: 'adamW'                                          # modes: ['adam', 'adamW', 'lamb']
+#  learning_rate: 0.0001                                 # Learning rate for opt. "4e-4" for 'data/libri_mel160_subword5000', "2e-4" for 'data/libri_fmllr_cmvn'
+  learning_rate: 0.0001 ##gst 3.2 change
+  loss_scale: 0                                         # Loss scale to improve fp16 numeric stability. Only used when apex is set to True. 0: dynamic loss scaling. positive power of 2: static loss scaling.
+  warmup_proportion: 0.7                                # Proportion of training to perform linear rate warmup.
+  gradient_accumulation_steps: 1                        # Number of updates steps to accumulate before performing a backward/update pass
+  gradient_clipping: 1.0                                # Maximum gradient norm
+
+dataloader:
+#  n_jobs: 2
+  #2. 21 gst change:
+  n_jobs: 4
+  batch_size: 1
+  vocab_size : 21128
+decode:
+  beam_size: 20
+  min_len_ratio: 0.01
+
+attention:
+  mode: 'loc'                           # 'dot'/'loc'
+  dim: 300
+  num_head: 1
+  v_proj: False                         # if False and num_head>1, encoder state will be duplicated for each head
+  temperature: 0.5                      # scaling factor for attention
+  loc_kernel_size: 100                  # just for mode=='loc'
+  loc_kernel_num: 10                    # just for mode=='loc'
+decoder:
+  module: 'LSTM'                        # 'LSTM'/'GRU'/'Transformer'
+#  dim: 512
+  dim: 768 #3.14 gst change,because Encoder's dim is 768
+  layer: 1
+  dropout: 0
+
